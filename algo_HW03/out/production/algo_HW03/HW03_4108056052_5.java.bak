@@ -1,0 +1,123 @@
+public class HW03_4108056052_5 extends HillFinding
+{
+
+    static int threadNum = 8;
+    int[] A;
+    volatile static int _ans = -1;
+    volatile static boolean _isFind = false;
+
+    public static void main(String[] args)
+    {
+		HW03_4108056052_5 test = new HW03_4108056052_5();
+        int[] A = new TestDataGenerator().readData();
+		Stopwatch stopwatch = new Stopwatch();
+		System.out.println("hill is: "+test.H_Finding(A));
+		double time = stopwatch.elapsedTime();
+		System.out.println("elapsed time " + time);
+    }
+
+    @Override
+    public int H_Finding(int[] A)
+    {
+        this.A = A;
+        int len = A.length;
+
+        if (len < threadNum * 2)
+        {
+            //find from mid
+            //if start > mid -> new array's right
+            //if start = mid -> new array's left
+            int len_index = len - 1;
+            int start = 0, end = len_index;
+            if (A[start] < A[end])
+            {
+                return -1;
+            }
+
+            int mid = (start + end) / 2;
+            while (mid != start)
+            {
+                if (A[mid] >= A[start])
+                {
+                    start = mid;
+                }
+                else
+                {
+                    end = mid;
+                }
+                mid = (start + end) / 2;
+            }
+
+            return len_index - end;
+        }
+        else
+        {
+            Thread4108056052[] thread4108056052 = new Thread4108056052[threadNum];
+            for (int i = 0; i < threadNum; i++)
+            {
+                thread4108056052[i] = new Thread4108056052(i);
+                thread4108056052[i].start();
+            }
+
+            try
+            {
+                for (int i = 0; i < threadNum; i++)
+                {
+                    thread4108056052[i].join();
+                }
+            }
+            catch (InterruptedException e)
+            {
+            }
+        }
+        return _ans;
+    }
+
+    class Thread4108056052 extends Thread
+    {
+        int num;
+
+        public Thread4108056052(int num)
+        {
+            this.num = num; // number of thread
+        }
+
+        public void run()
+        {
+            int start = A.length / (threadNum) * num;
+            int end = num == (threadNum - 1) ?  A.length - 1: A.length / threadNum * (num + 1) + 1;
+            int ans = this.HF(A, start, end);
+            if (ans != -1)
+            {
+                _ans = ans;
+                _isFind = true;
+            }
+        }
+
+        public int HF(int[] A, int start, int end)
+        {
+            int len_index = A.length - 1;
+            if (A[start] < A[end])
+            {
+                return -1;
+            }
+
+            int mid = (start + end) / 2;
+            while (mid != start)
+            {
+                if (A[mid] >= A[start])
+                {
+                    start = mid;
+                }
+                else
+                {
+                    end = mid;
+                }
+                mid = (start + end) / 2;
+            }
+            return len_index - end;
+        }
+    }
+}
+
+
